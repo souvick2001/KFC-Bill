@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>KFC – Generate Bill</title>
+  <style>
+    :root {
+      --kfc-red: #E21B15;
+      --kfc-dark-red: #a30e0a;
+      --muted: #333;
+      --card-bg: #fff;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    body {
+      font-family: "Segoe UI", "Helvetica", Arial, sans-serif;
+      background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+      min-height: 100vh;
+      color: var(--muted);
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .center-logo {
+      width: 180px;
+      height: auto;
+      filter: drop-shadow(0 4px 12px rgba(226, 27, 21, 0.3));
+      animation: float 3s ease-in-out infinite;
+      transition: transform 0.3s ease;
+    }
+
+    .center-logo:hover {
+      transform: scale(1.1) rotate(5deg);
+      animation: none;
+    }
+
+    .brand h1 {
+      font-size: 2.5rem;
+      color: var(--kfc-red);
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+      letter-spacing: 1px;
+    }
+
+    .brand p {
+      color: #666;
+      margin-top: 8px;
+      font-size: 1.1rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 32px 28px;
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      animation: slideIn 0.6s ease-out;
+      border: 1px solid rgba(226, 27, 21, 0.1);
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      color: var(--kfc-red);
+      margin-bottom: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title::before {
+      content: "🍗";
+      font-size: 1.5rem;
+    }
+
+    .order-row {
+      display: grid;
+      grid-template-columns: 2fr 1.5fr 0.8fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 12px;
+      background: #fafafa;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      animation: slideIn 0.4s ease-out;
+    }
+
+    .order-row:hover {
+      background: #f5f5f5;
+      box-shadow: var(--shadow-sm);
+      transform: translateX(4px);
+    }
+
+    .input {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--kfc-red);
+      box-shadow: 0 0 0 3px rgba(226, 27, 21, 0.1);
+      transform: scale(1.02);
+    }
+
+    .input:hover {
+      border-color: #ccc;
+    }
+
+    .qty {
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .btn {
+      background: #222;
+      color: #fff;
+      border: none;
+      padding: 11px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn.red {
+      background: var(--kfc-red);
+    }
+
+    .btn.small {
+      padding: 8px 14px;
+      background: #e74c3c;
+      font-size: 0.9rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn.red:hover {
+      background: var(--kfc-dark-red);
+    }
+
+    .btn.small:hover {
+      background: #c0392b;
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .controls {
+      display: flex;
+      gap: 14px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 2px dashed #e0e0e0;
+    }
+
+    .controls .btn {
+      flex: 1;
+      padding: 14px 24px;
+      font-size: 1.1rem;
+    }
+
+    .hint {
+      margin-top: 16px;
+      font-size: 0.95rem;
+      color: #777;
+      text-align: center;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      border-left: 4px solid var(--kfc-red);
+    }
+
+    .foot {
+      margin-top: 24px;
+      text-align: center;
+      color: #888;
+      font-size: 0.9rem;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+      .brand h1 {
+        font-size: 2rem;
+      }
+
+      .center-logo {
+        width: 140px;
+      }
+
+      .order-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .controls {
+        flex-direction: column;
+      }
+
+      .card {
+        padding: 24px 18px;
+      }
+    }
+
+    /* Loading animation for submit */
+    .btn.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .btn.loading::after {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      top: 50%;
+      left: 50%;
+      margin-left: -8px;
+      margin-top: -8px;
+      border: 2px solid transparent;
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="brand">
+      <div class="logo-container">
+        <img src="static/assets/kfc_logo.png" alt="KFC Logo" class="center-logo">
+      </div>
+      <h1>Order Billing System</h1>
+      <p>Kolkata, West Bengal</p>
+    </header>
+
+    <section class="card">
+      <h2 class="section-title">Your Order</h2>
+      <form id="orderForm" method="post" action="/generate">
+        <div id="rows"></div>
+
+        <div class="controls">
+          <button type="button" id="addRowBtn" class="btn red">➕ Add Item</button>
+          <button type="submit" class="btn">📄 Generate PDF Bill</button>
+        </div>
+
+        <p class="hint">💡 Select items, choose size and quantity, then generate your bill</p>
+      </form>
+    </section>
+
+    <footer class="foot">
+      <small>🍗 KFC Kolkata – Demo Billing System</small>
+    </footer>
+  </main>
+
+<script>
+  const menu = {
+    "Zinger Burger": {"Regular": 85, "Big Size": 110, "Customize": 135},
+    "Chicken Strips": {"Regular": 145, "Big Size": 195, "Customize": 235},
+    "KFC Chicken": {"Regular": 290, "Big Size": 350, "Customize": 410},
+    "Chicken Bowl": {"Regular": 295, "Big Size": 365, "Customize": 450}
+  };
+
+  function createRow() {
+    const row = document.createElement('div');
+    row.className = 'order-row';
+
+    const nameSel = document.createElement('select');
+    nameSel.name = "item_name[]";
+    nameSel.className = 'input';
+    nameSel.innerHTML = '<option value="">-- Select Item --</option>';
+    for (const item in menu) {
+      const opt = document.createElement('option');
+      opt.value = item;
+      opt.text = item;
+      nameSel.appendChild(opt);
+    }
+
+    const sizeSel = document.createElement('select');
+    sizeSel.name = "item_size[]";
+    sizeSel.className = 'input';
+    sizeSel.innerHTML = '<option value="">-- Select Size --</option>';
+    sizeSel.disabled = true;
+
+    const qtyInput = document.createElement('input');
+    qtyInput.type = 'number';
+    qtyInput.name = 'item_qty[]';
+    qtyInput.className = 'input qty';
+    qtyInput.min = 1;
+    qtyInput.value = 1;
+    qtyInput.placeholder = 'Qty';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn small';
+    removeBtn.textContent = '✕';
+    removeBtn.onclick = () => {
+      row.style.animation = 'slideOut 0.3s ease-out';
+      setTimeout(() => row.remove(), 300);
+    };
+
+    nameSel.addEventListener('change', () => {
+      sizeSel.innerHTML = '<option value="">-- Select Size --</option>';
+      if (!nameSel.value) {
+        sizeSel.disabled = true;
+        return;
+      }
+      sizeSel.disabled = false;
+      const sizes = menu[nameSel.value];
+      for (const s in sizes) {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.text = `${s} (₹${sizes[s]})`;
+        sizeSel.appendChild(opt);
+      }
+    });
+
+    row.appendChild(nameSel);
+    row.appendChild(sizeSel);
+    row.appendChild(qtyInput);
+    row.appendChild(removeBtn);
+    return row;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const rows = document.getElementById('rows');
+    rows.appendChild(createRow());
+    
+    document.getElementById('addRowBtn').onclick = () => {
+      const newRow = createRow();
+      rows.appendChild(newRow);
+    };
+
+    document.getElementById('orderForm').onsubmit = (e) => {
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.classList.add('loading');
+      submitBtn.textContent = 'Generating...';
+    };
+  });
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideOut {
+      to { opacity: 0; transform: translateX(-30px); }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>
